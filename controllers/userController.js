@@ -92,9 +92,14 @@ const confirm = async (req, res) => {
 
 const requestNewPassword = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { entity } = req.body;
 
-        const user = await User.findOne({email})
+        const user = await User.findOne({
+            '$or': [
+                {'email': entity},
+                {'username': entity},
+            ]
+        })
 
         if (!user) {
             const err = new Error('The token is not valid')
@@ -119,7 +124,7 @@ const requestNewPassword = async (req, res) => {
 
         sendEmailRequestNewPassword(user)
 
-        return res.json({msg: "Please verify your email"})
+        return res.json({msg: "The link has been sent to your email"})
 
     } catch (err) {
         console.error('User Controller Error', err)
