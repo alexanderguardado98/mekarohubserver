@@ -28,7 +28,7 @@ export const sendEmailRequestNewPassword = async (data) => {
     const transport = getTransport()
     const FRONTEND_URL = process.env.FRONTEND_URL;
 
-    const url = `${FRONTEND_URL}/change-password/${token}`
+    const url = `${FRONTEND_URL}/new-password/${token}`
 
     await transport.sendMail({
         from: '"Mekaro Hub" <admin@mekarohub.com>',

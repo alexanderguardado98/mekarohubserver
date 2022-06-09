@@ -151,6 +151,15 @@ const resetPassword = async (req, res) => {
             })
         }
 
+        if (!password) /// VALIDATE
+            return res.status(400).json({
+                errMsg: "There are some problem with some fields!",
+                errType: ERROR_TYPE_FIELDS,
+                fields: {
+                    "password": "Password is required"
+                }
+            })
+
         user.token = "";
         user.tokenType = "none";
         user.password = password;
