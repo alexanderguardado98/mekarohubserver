@@ -205,11 +205,13 @@ const login = async (req, res) => {
                 const token = generateToken(user._id)
 
                 res.json({
-                    _id: user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    username: user.username,
+                    msg: "Welcome Back",
+                    user: {
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        username: user.username,
+                    },
                     token: token
                 })
 
