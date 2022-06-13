@@ -6,7 +6,7 @@ const authMiddleware = async (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             let token = req.headers.authorization.split(' ')[1];
-
+            //console.log(token)
             const decode = jwt.verify(token, process.env.JWT_SECRET);
 
             const { id } = decode;
@@ -14,7 +14,7 @@ const authMiddleware = async (req, res, next) => {
             const user = await User.findById(id).select("_id username firstName lastName email")
 
             if (!user) {
-                console.error('Auth Middleware Error', err)
+                console.error('Auth Middleware Error')
                 const error = new Error('There have been an unexpected error!')
                 return res.status(500).json({
                     errMsg: error.message,
