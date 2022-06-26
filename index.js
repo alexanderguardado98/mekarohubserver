@@ -5,6 +5,7 @@ import cors from "cors"
 import connect from "./config/db.js"
 
 import userRoute from './routes/userRoute.js'
+import conceptRoute from './routes/conceptRoute.js'
 
 const app = express()
 dotenv.config()
@@ -27,6 +28,7 @@ app.use(cors(corsOptions))
 connect()
 
 app.use('/api/users', userRoute)
+app.use('/api/concepts', conceptRoute)
 
 const PORT = process.env.PORT || 4000
 
