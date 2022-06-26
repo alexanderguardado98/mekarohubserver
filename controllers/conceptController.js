@@ -20,12 +20,15 @@ const newConcept = async (req, res) => {
             })
         // ------------------------------------------
         concept.save();
+
         res.json({
             msg: "Concept Created!",
             concept: {
                 _id: concept._id,
                 title: concept.title,
                 description: concept.description,
+                owner: user,
+                createdAt: concept.createdAt
             },
         })
     } catch (err) {
@@ -42,7 +45,7 @@ const getConcepts = async (req, res) => {
     try {
         const { user } = req;
 
-        const concepts = await Concept.find({ owner: user._id }).sort({ createdAt: -1 });
+        const concepts = await Concept.find({ owner: user._id }).select("-__v").populate("owner", "username").sort({ createdAt: -1 });
 
         res.json(concepts);
     } catch (err) {
