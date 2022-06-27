@@ -19,6 +19,12 @@ const newConcept = async (req, res) => {
                 fields: getErrorFields(validationError)
             })
         // ------------------------------------------
+        const _maxConcept = await Concept.find({owner: user._id}).sort({"order": -1}).limit(1)
+        
+        const currentMaxConcept = (_maxConcept.length > 0)? _maxConcept[0].order : 0;
+
+        concept.order = currentMaxConcept + 1;
+
         concept.save();
 
         res.json({
@@ -45,7 +51,7 @@ const getConcepts = async (req, res) => {
     try {
         const { user } = req;
 
-        const concepts = await Concept.find({ owner: user._id }).select("-__v").populate("owner", "username").sort({ createdAt: -1 });
+        const concepts = await Concept.find({ owner: user._id }).select("-__v").populate("owner", "username").sort({ order: 1 });
 
         res.json(concepts);
     } catch (err) {
