@@ -1,4 +1,5 @@
 import Concept from "../models/Concept.js";
+import SharedConcept from "../models/SharedConcept.js";
 
 import { ERROR_TYPE_FIELDS, UNEXPECTED_ERROR, ERROR_MESSAGE } from "../types/index.js";
 
@@ -8,7 +9,7 @@ const newConcept = async (req, res) => {
         const { body : data } = req
 
         const concept = new Concept(data)
-        concept.owner = user._id;
+        concept.owner = user._id
 
         // Validation //////////////////////////////////////////
         let validationError = concept.validateSync();
@@ -19,13 +20,19 @@ const newConcept = async (req, res) => {
                 fields: getErrorFields(validationError)
             })
         // ------------------------------------------
-        const _maxConcept = await Concept.find({owner: user._id}).sort({"order": -1}).limit(1)
-        
-        const currentMaxConcept = (_maxConcept.length > 0)? _maxConcept[0].order : 0;
+        await concept.save();
 
-        concept.order = currentMaxConcept + 1;
+        const _maxConcept = await SharedConcept.find({user: user._id}).sort({"order": -1}).limit(1)
+        const currentMaxConcept = (_maxConcept.length > 0)? _maxConcept[0].order + 1: 1;
 
-        concept.save();
+        const sharedConcept = new SharedConcept({ 
+            user: user._id,
+            concept: concept._id,
+            order: currentMaxConcept,
+            isCreator: true,
+        })
+
+        await sharedConcept.save();
 
         res.json({
             msg: "Concept Created!",
@@ -33,10 +40,54 @@ const newConcept = async (req, res) => {
                 _id: concept._id,
                 title: concept.title,
                 description: concept.description,
-                owner: user,
-                createdAt: concept.createdAt
+                createdAt: concept.createdAt,
+                owner: user.username,
+                isCreator: true,
+                order: currentMaxConcept,
             },
         })
+    } catch (err) {
+        console.error('Concept Controller Error', err)
+        const error = new Error('There have been an unexpected error!')
+        return res.status(500).json({
+            errMsg: error.message,
+            errType: UNEXPECTED_ERROR,
+        })
+    }
+}
+
+const reorderConcepts = async (req, res) => {
+    try {
+        const { user } = req;
+        const { body : {concepts} } = req
+
+        console.log(concepts)
+
+        
+
+        const prevSharedConcept = await SharedConcept.findOne({ user: user._id, concept: prev });
+        const currentSharedConcept = await SharedConcept.findOne({ user: user._id, concept: current });
+
+        if (prevSharedConcept && currentSharedConcept) {
+            const prevOrder = prevSharedConcept.order;
+            currentSharedConcept.order = prevOrder;
+
+
+            const currentOrder = currentSharedConcept.order;
+
+            prevSharedConcept.order = currentOrder;
+
+            await prevSharedConcept.save()
+            await currentSharedConcept.save()
+
+            return res.json({msg: "Concepts' Order updated!", data: { prev, current }});
+        }
+
+        return res.status(400).json({
+            errMsg: "We couldn't update the order",
+            errType: ERROR_MESSAGE,
+        })
+        
     } catch (err) {
         console.error('Concept Controller Error', err)
         const error = new Error('There have been an unexpected error!')
@@ -51,7 +102,21 @@ const getConcepts = async (req, res) => {
     try {
         const { user } = req;
 
-        const concepts = await Concept.find({ owner: user._id }).select("-__v").populate("owner", "username").sort({ order: 1 });
+        const sharedConcepts = await SharedConcept.find({ user: user._id }).select("-__v").populate({ path: 'concept', populate: { path: 'owner', select: "username" } }).sort({ order: 1 });
+
+        const concepts = sharedConcepts.map(shared => {
+            const {concept, isCreator, order} = shared;
+
+            return {
+                _id: concept._id,
+                title: concept.title,
+                description: concept.description,
+                createdAt: concept.createdAt,
+                owner: concept.owner.username,
+                isCreator,
+                order
+            }
+        })
 
         res.json(concepts);
     } catch (err) {
@@ -66,5 +131,6 @@ const getConcepts = async (req, res) => {
 
 export {
     newConcept,
-    getConcepts
+    getConcepts,
+    reorderConcepts
 }
