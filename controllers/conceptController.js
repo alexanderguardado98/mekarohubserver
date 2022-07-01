@@ -60,33 +60,26 @@ const reorderConcepts = async (req, res) => {
     try {
         const { user } = req;
         const { body : {concepts} } = req
-
-        console.log(concepts)
-
         
+        if (!concepts) 
+            return res.status(400).json({
+                errMsg: "We couldn't update the order",
+                errType: ERROR_MESSAGE,
+            })
 
-        const prevSharedConcept = await SharedConcept.findOne({ user: user._id, concept: prev });
-        const currentSharedConcept = await SharedConcept.findOne({ user: user._id, concept: current });
+        for (let index in concepts) {
+            const concept = concepts[index]
 
-        if (prevSharedConcept && currentSharedConcept) {
-            const prevOrder = prevSharedConcept.order;
-            currentSharedConcept.order = prevOrder;
-
-
-            const currentOrder = currentSharedConcept.order;
-
-            prevSharedConcept.order = currentOrder;
-
-            await prevSharedConcept.save()
-            await currentSharedConcept.save()
-
-            return res.json({msg: "Concepts' Order updated!", data: { prev, current }});
+            const sharedconcept = await SharedConcept.findOne({ user: user._id, concept: concept.id });
+            
+            if (sharedconcept) {
+                sharedconcept.order = concept.order;
+                await sharedconcept.save()
+                
+            }
         }
 
-        return res.status(400).json({
-            errMsg: "We couldn't update the order",
-            errType: ERROR_MESSAGE,
-        })
+        return res.json({msg: "Concepts' Order updated!"});
         
     } catch (err) {
         console.error('Concept Controller Error', err)
