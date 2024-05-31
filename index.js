@@ -18,6 +18,7 @@ const corsOptions = {
             // Puede consultar la API
             callback(null, true)
         } else {
+            console.log(whitelist)
             callback(new Error(`Cors Error ${origin}`))
         }
     }
