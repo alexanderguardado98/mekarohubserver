@@ -120,6 +120,15 @@ const requestNewPassword = async (req, res) => {
         user.token = generateRandomToken();
         user.tokenType = "newpassword";
 
+        let validationError = user.validateSync();
+
+        if (validationError) /// VALIDATE
+            return res.status(400).json({
+                errMsg: "There are some problem with some fields!",
+                errType: ERROR_TYPE_FIELDS,
+                fields: getErrorFields(validationError)
+            })
+
         await user.save()
 
         sendEmailRequestNewPassword(user)
@@ -164,6 +173,15 @@ const resetPassword = async (req, res) => {
         user.tokenType = "none";
         user.password = password;
 
+        let validationError = user.validateSync();
+
+        if (validationError) /// VALIDATE
+            return res.status(400).json({
+                errMsg: "There are some problem with some fields!",
+                errType: ERROR_TYPE_FIELDS,
+                fields: getErrorFields(validationError)
+            })
+
         await user.save()
 
         return res.json({msg: "Your password has been updated"})
@@ -191,15 +209,21 @@ const login = async (req, res) => {
 
         if (!user) 
             return res.status(404).json({
-                errMsg: "The user does not exist",
-                errType: ERROR_MESSAGE,
+                errMsg: "Access denied",
+                errType: ERROR_TYPE_FIELDS,
+                fields: {
+                    "entity": "Username / Email or Password are incorrect",
+                }
             })
         
         if (await user.comparePassword(password)) {
             if (!user.activated) 
                 return res.status(400).json({
-                    errMsg: "The user is not active",
-                    errType: ERROR_MESSAGE,
+                    errMsg: "Access denied",
+                    errType: ERROR_TYPE_FIELDS,
+                    fields: {
+                        "entity": "Username / Email or Password are incorrect",
+                    }
                 })
 
                 const token = generateToken(user._id)
@@ -217,8 +241,11 @@ const login = async (req, res) => {
 
         } else 
             return res.status(404).json({
-                errMsg: "Wrong password",
-                errType: ERROR_MESSAGE,
+                errMsg: "Access denied",
+                errType: ERROR_TYPE_FIELDS,
+                fields: {
+                    "entity": "Username / Email or Password are incorrect",
+                }
             })
 
     } catch (err) {

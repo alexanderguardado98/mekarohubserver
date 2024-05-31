@@ -9,9 +9,9 @@ export const sendEmailSignUp = async (data) => {
     const url = `${FRONTEND_URL}/confirm/${token}`
 
     await transport.sendMail({
-        from: '"Mekaro Hub" <admin@mekarohub.com>',
+        from: '"Moonnuit Studio" <moonnuitstudio@gmail.com>',
         to: email,
-        subject: "Mekaro Hub - Confirm Account",
+        subject: "Moonnuit Studio - Confirm Account",
         text: "Your account is almost ready, it only remains to verify your account using the following link",
         template: 'signupEmail',
         context: {

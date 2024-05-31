@@ -4,6 +4,7 @@ import hbs from 'nodemailer-express-handlebars'
 
 export const getTransport = () => {
     const transport = nodemailer.createTransport({
+        service: "Gmail",
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         auth: {
