@@ -13,15 +13,16 @@ dotenv.config()
 const whitelist = [process.env.FRONTEND_URL]
 
 const corsOptions = {
-    origin: function(origin, callback) {
-        if (whitelist.includes(origin)) {
-            // Puede consultar la API
-            callback(null, true)
-        } else {
-            console.log(whitelist)
-            callback(new Error(`Cors Error ${origin}`))
-        }
-    }
+    origin: '*'
+    // function(origin, callback) {
+    //     if (whitelist.includes(origin)) {
+    //         // Puede consultar la API
+    //         callback(null, true)
+    //     } else {
+    //         console.log(whitelist)
+    //         callback(new Error(`Cors Error ${origin}`))
+    //     }
+    // }
 }
 
 app.use(express.json())
