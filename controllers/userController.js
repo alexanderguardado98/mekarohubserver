@@ -14,6 +14,9 @@ const singUp = async (req, res) => {
 
         let validationError = user.validateSync();
 
+        data.username = `${data.username}`.toLowerCase()
+        data.email = `${data.email}`.toLowerCase()
+
         if (validationError) /// VALIDATE
             return res.status(400).json({
                 errMsg: "There are some problem with some fields!",
@@ -202,8 +205,8 @@ const login = async (req, res) => {
 
         const user = await User.findOne({
             '$or': [
-                {'email': entity},
-                {'username': entity},
+                {'email': `${entity}`.toLowerCase()},
+                {'username': `${entity}`.toLowerCase()},
             ]
         })
 
