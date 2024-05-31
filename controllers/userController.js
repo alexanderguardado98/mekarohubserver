@@ -99,8 +99,8 @@ const requestNewPassword = async (req, res) => {
 
         const user = await User.findOne({
             '$or': [
-                {'email': entity},
-                {'username': entity},
+                {'email': `${entity}`.toLowerCase()},
+                {'username': `${entity}`.toLowerCase()},
             ]
         })
 
