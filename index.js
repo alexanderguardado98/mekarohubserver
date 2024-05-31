@@ -13,7 +13,9 @@ dotenv.config()
 const whitelist = [process.env.FRONTEND_URL]
 
 const corsOptions = {
-    origin: '*'
+    origin: function(origin, callback) {
+        callback(null, true)
+    }
     // function(origin, callback) {
     //     if (whitelist.includes(origin)) {
     //         // Puede consultar la API
